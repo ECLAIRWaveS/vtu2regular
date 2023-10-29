@@ -4,12 +4,12 @@ import scipy.interpolate as interp
 
 import vtk
 from vtk.util.numpy_support import vtk_to_numpy
-from vtk.numpy_interface import dataset_adapter as dsa
+# from vtk.numpy_interface import dataset_adapter as dsa
 
 __version__ = "0.0.1"
 
 
-def read_vtu(file: Path):
+def read_vtu(file: Path) -> tuple:
     """
     read .vtu unstructured grid file to Numpy ndarray
     """
@@ -21,42 +21,45 @@ def read_vtu(file: Path):
     reader = vtk.vtkXMLUnstructuredGridReader()
     reader.SetFileName(file)
 
-    # no longer available methods
+    # not available for UnstructuredReader
     # reader.ReadAllScalarsOn()
     # reader.ReadAllVectorsOn()
 
     reader.Update()
 
-    usg = dsa.WrapDataObject(reader.GetOutput())
-    data = vtk_to_numpy(usg.GetPoints())
-    print(f"{file} data shape: {data.shape}")
+    output = reader.GetOutput()
 
-    return data
+    # just returns grid points as following code
+    # usg = dsa.WrapDataObject(reader.GetOutput())
+    # data = vtk_to_numpy(usg.GetPoints())
 
     # coordinates of nodes in the mesh
-    # nodes_vtk = reader.GetOutput().GetPoints().GetData()
+    nodes_vtk = output.GetPoints().GetData()
     # print(nodes_vtk)
-    # nodes = vtk_to_numpy(nodes_vtk)
-    # # print(nodes.shape)
+    nodes = vtk_to_numpy(nodes_vtk)
 
-    # output = reader.GetOutput()
+    data = vtk_to_numpy(output.GetCellData().GetArray("meqn"))
 
-    # #Grab a scalar from the vtk file
+    return data, nodes
+
     # a = output.GetPointData().GetArray()
-    # print(a)
 
     # https://vtk.org/doc/nightly/html/classvtkResampleToImage.html
 
 
-def regularize(raw):
+def regularize(raw, nodes):
     """
     convert unstructured grid to regular grid
+
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
     """
 
-    interp.NearestNDInterpolator
+    interp.griddata
+
+    return None
 
 
-def write_reg(reg, file):
+def write_reg(reg, file: Path):
     """
     write regular grid to file
     """
