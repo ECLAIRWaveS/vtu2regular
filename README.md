@@ -2,6 +2,12 @@
 
 Uses the [VTK](https://vtk.org/) library to convert unstructured data in .vtu files to regular gridded data.
 
+For more efficient library we suggest first doing:
+
+```sh
+conda install vtk numpy scipy h5py matplotlib
+```
+
 Install this (and prerequisite Python modules) in development "live" mode by:
 
 ```sh
