@@ -19,7 +19,8 @@ def read_vtu(file: Path) -> tuple:
         raise FileNotFoundError(file)
 
     reader = vtk.vtkXMLUnstructuredGridReader()
-    reader.SetFileName(file)
+       
+    reader.SetFileName(str(file))
 
     # not available for UnstructuredReader
     # reader.ReadAllScalarsOn()
@@ -33,13 +34,21 @@ def read_vtu(file: Path) -> tuple:
     # usg = dsa.WrapDataObject(reader.GetOutput())
     # data = vtk_to_numpy(usg.GetPoints())
 
-    # coordinates of nodes in the mesh
+    # coordinates of nodes in the mesh; not sure what "nodes" are...
     nodes_vtk = output.GetPoints().GetData()
     # print(nodes_vtk)
     nodes = vtk_to_numpy(nodes_vtk)
 
-    data = vtk_to_numpy(output.GetCellData().GetArray("meqn"))
+    # MZ - I believe this may be the cell center data
+    #cellctridx=vtk_to_numpy(output.GetCellLocationsArray())
+    cellctrsdata=vtk.vtkDoubleArray()
+    cellctrs=vtk.vtkCellCenters()
+    
+    # The below line to compute the cell centers will segfault
+    #cellctrs.ComputeCellCenters(output,cellctrsdata)
 
+    data = vtk_to_numpy(output.GetCellData().GetArray("meqn"))
+    
     return data, nodes
 
     # a = output.GetPointData().GetArray()
