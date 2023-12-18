@@ -2,9 +2,11 @@
 
 Uses the [VTK](https://vtk.org/) library to convert unstructured data in .vtu files to regular gridded data.
 
-For more efficient library we suggest first doing:
+For more efficient libraries useful for the huge datasets we suggest using Anaconda/Miniconda Python.
+Install / update by first doing from the Conda terminal environment:
 
 ```sh
+conda update conda
 conda install vtk numpy scipy h5py matplotlib
 ```
 
