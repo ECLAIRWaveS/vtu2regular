@@ -123,7 +123,7 @@ def sample_gemini(data, centers, parmids=[-1], lpts=None, lims=None, targettype=
     # perform interpolation onto target sites
     parmi=np.zeros( (lpts[0], lpts[1], lpts[2], len(parmidextract) ), dtype=np.int32 )
     for iparm in range(len(parmidextract)):
-        print("sample_gemini --> Sampling parameter number:  ",parmidextrac[iparm]," on target grid size ",lpts)
+        print("sample_gemini --> Sampling parameter number:  ",parmidextract[iparm]," on target grid size ",lpts)
         parmitmp = griddata((x,y,z), data[:,parmidextract[iparm]], (Xi.flatten(order="F"),Yi.flatten(order="F"),Zi.flatten(order="F")),method="nearest")
         parmi[:,:,:,iparm]=parmitmp.reshape(lpts,order="F")
         

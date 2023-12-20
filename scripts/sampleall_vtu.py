@@ -13,10 +13,13 @@ import os
 # Obtain the model data and cell center locations
 #filename="/Users/zettergm/simulations/ssd/figments_misty_3Dx_512_23/gemini_output/fort_frame_0028.vtu"
 direc="/Users/zettergm/simulations/ssd/figments_misty_3Dx_2048_36_long/gemini_output/"
+outdirec="/Users/zettergm/simulations/ssd/figments_misty_3Dx_2048_36_long/gemini_output_hdf5/"
+if not os.path.isdir(outdirec):
+    os.mkdir(outdirec)
 filelist=os.listdir(direc)
 
 for filename in filelist: 
-    filenamefull=direc+"fort_frame_0028.vtu"
+    filenamefull=direc+filename
     print("Reading vtu file:  "+filenamefull)
     data, centers, nodes = vtu2regular.read_vtu(filenamefull)
     iparm=np.array([13],dtype=np.int32)            # parameter number, must be int
@@ -30,7 +33,7 @@ for filename in filelist:
     # Write the uniformly sampled data to a file
     coordlbls=["alti","mloni","mlati"]
     parmlbls=["v1"]
-    filenamefullhdf5 = filenamefull+".hdf5"
+    filenamefullhdf5 = outdirec+filename+".hdf5"
     print("Writing hdf file:  "+filenamefullhdf5)
     vtu2regular.write_sampled(alti,mloni,mlati,coordlbls,parmi,parmlbls,filenamefullhdf5)
 
