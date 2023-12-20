@@ -19,7 +19,6 @@ def read_vtu(file: Path) -> tuple:
         raise FileNotFoundError(file)
 
     reader = vtk.vtkXMLUnstructuredGridReader()
-       
     reader.SetFileName(str(file))
 
     # not available for UnstructuredReader
@@ -27,7 +26,6 @@ def read_vtu(file: Path) -> tuple:
     # reader.ReadAllVectorsOn()
 
     reader.Update()
-
     output = reader.GetOutput()
 
     # just returns grid points as following code
@@ -39,17 +37,23 @@ def read_vtu(file: Path) -> tuple:
     # print(nodes_vtk)
     nodes = vtk_to_numpy(nodes_vtk)
 
-    # MZ - I believe this may be the cell center data
+    # MZ - I believe this may be the cell index data; into what I'm not sure
     #cellctridx=vtk_to_numpy(output.GetCellLocationsArray())
-    cellctrsdata=vtk.vtkDoubleArray()
+    
+    # use a filter to retrieve cell centers
+    #cellctrsdata=vtk.vtkDoubleArray()
     cellctrs=vtk.vtkCellCenters()
+    cellctrs.SetInputDataObject(output)
+    cellctrs.Update()
+    cellctrsdata=cellctrs.GetOutput()
+    ctrs=vtk_to_numpy(cellctrsdata.GetPoints().GetData())
     
     # The below line to compute the cell centers will segfault
     #cellctrs.ComputeCellCenters(output,cellctrsdata)
 
     data = vtk_to_numpy(output.GetCellData().GetArray("meqn"))
-    
-    return data, nodes
+       
+    return data, ctrs, nodes
 
     # a = output.GetPointData().GetArray()
 
