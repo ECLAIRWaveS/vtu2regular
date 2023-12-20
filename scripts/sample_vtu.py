@@ -15,16 +15,25 @@ import numpy as np
 
 # Obtain the model data and cell center locations
 #filename="/Users/zettergm/simulations/ssd/figments_misty_3Dx_512_23/gemini_output/fort_frame_0028.vtu"
-filename="/Users/zettergm/simulations/ssd/figments_misty_3Dx_2048_36_long/gemini_output/fort_frame_0028.vtu"
+direc="/Users/zettergm/simulations/ssd/figments_misty_3Dx_2048_36_long/gemini_output/"
+filename=direc+"fort_frame_0028.vtu"
 print("Reading vtu file:  "+filename)
 data, centers, nodes = vtu2regular.read_vtu(filename)
-iparm=np.array([13],dtype=np.int32)
-lims=np.array([90e3,500e3,-155,-145,25,33])
-lpts=np.array([128,128,128],dtype=np.int32)
+iparm=np.array([13],dtype=np.int32)            # parameter number, must be int
+lims=np.array([90e3,500e3,-155,-145,25,33])    # extent of interpolation region, double
+lpts=np.array([128,128,128],dtype=np.int32)    # size of target grid, must be int
 print("Resampling GEMINI data...")
 alti,mloni,mlati,parmi = vtu2regular.sample_gemini(data,centers,parmids=iparm,
                                                    lpts=lpts,lims=lims,
                                                    targettype="geomagnetic")
+
+
+# Write the uniformly sampled data to a file
+coordlbls=["alti","mloni","mlati"]
+parmlbls=["v1"]
+filename = filename+".hdf5"
+vtu2regular.write_sampled(alti,mloni,mlati,coordlbls,parmi,parmlbls,filename)
+
 
 # Make a plot
 plt.subplots(1,3,dpi=100)

@@ -8,6 +8,8 @@ from vtk.util.numpy_support import vtk_to_numpy
 import numpy as np
 
 from scipy.interpolate import griddata as griddata
+
+import h5py
 # from vtk.numpy_interface import dataset_adapter as dsa
 
 __version__ = "0.0.1"
@@ -121,15 +123,27 @@ def sample_gemini(data, centers, parmids=[-1], lpts=None, lims=None, targettype=
     # perform interpolation onto target sites
     parmi=np.zeros( (lpts[0], lpts[1], lpts[2], len(parmidextract) ), dtype=np.int32 )
     for iparm in range(len(parmidextract)):
-        print("sample_gemini --> Sampling parameter number:  ",iparm," on target grid size ",lpts)
+        print("sample_gemini --> Sampling parameter number:  ",parmidextrac[iparm]," on target grid size ",lpts)
         parmitmp = griddata((x,y,z), data[:,parmidextract[iparm]], (Xi.flatten(order="F"),Yi.flatten(order="F"),Zi.flatten(order="F")),method="nearest")
         parmi[:,:,:,iparm]=parmitmp.reshape(lpts,order="F")
         
     return x1i,x2i,x3i,parmi
 
 
-def write_reg(reg, file: Path):
+def write_sampled(x1i,x2i,x3i,coordlbls,parmi,parmlbls,file: Path):
     """
-    write regular grid to file
+    write regular grid and data to an hdf5 file
     """
-    pass
+    
+    f = h5py.File(file,"w")
+    f.create_dataset("/x1i",data=x1i)
+    f.create_dataset("/x2i",data=x2i)
+    f.create_dataset("/x3i",data=x3i)
+    f.create_dataset("/coordlbls",data=coordlbls)
+    f.create_dataset("/parmi",data=parmi)
+    f.create_dataset("/parmlbls",data=parmlbls)
+    f.close()
+    
+    return 
+
+
