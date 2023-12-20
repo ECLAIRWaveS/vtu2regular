@@ -22,7 +22,7 @@ for filename in filelist:
     filenamefull=direc+filename
     print("Reading vtu file:  "+filenamefull)
     data, centers, nodes = vtu2regular.read_vtu(filenamefull)
-    iparm=np.array([13],dtype=np.int32)            # parameter number, must be int
+    iparm=np.array([6,13,20,27,28,34],dtype=np.int32)            # parameter number, must be int
     lims=np.array([90e3,500e3,-155,-145,25,33])    # extent of interpolation region, double
     lpts=np.array([128,128,128],dtype=np.int32)    # size of target grid, must be int
     print("Resampling GEMINI data...")
@@ -32,7 +32,7 @@ for filename in filelist:
     
     # Write the uniformly sampled data to a file
     coordlbls=["alti","mloni","mlati"]
-    parmlbls=["v1"]
+    parmlbls=["ne","v1","v2","v3","Ti","Te"]
     filenamefullhdf5 = outdirec+filename+".hdf5"
     print("Writing hdf file:  "+filenamefullhdf5)
     vtu2regular.write_sampled(alti,mloni,mlati,coordlbls,parmi,parmlbls,filenamefullhdf5)
