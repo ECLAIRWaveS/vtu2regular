@@ -17,6 +17,8 @@ outdirec="/Users/zettergm/simulations/ssd/figments_misty_3Dx_2048_36_long/gemini
 if not os.path.isdir(outdirec):
     os.mkdir(outdirec)
 filelist=os.listdir(direc)
+filelist.sort()
+filelist=filelist[1:]     # get rid of mac OS file
 
 for filename in filelist: 
     filenamefull=direc+filename
