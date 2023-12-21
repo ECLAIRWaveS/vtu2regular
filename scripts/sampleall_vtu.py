@@ -25,12 +25,16 @@ for filename in filelist:
     print("Reading vtu file:  "+filenamefull)
     data, centers, nodes = vtu2regular.read_vtu(filenamefull)
     iparm=np.array([6,13,20,27,28,34],dtype=np.int32)            # parameter number, must be int
-    lims=np.array([90e3,500e3,-155,-145,25,33])    # extent of interpolation region, double
     lpts=np.array([384,384,384],dtype=np.int32)    # size of target grid, must be int
     print("Resampling GEMINI data...")
+    # mlims=np.array([90e3,500e3,-155,-145,25,33])    # extent of interpolation region, double
+    # alti,mloni,mlati,parmi = vtu2regular.sample_gemini(data,centers,parmids=iparm,
+    #                                                    lpts=lpts,lims=mlims,
+    #                                                    targettype="geomagnetic")
+    glims=np.array([90e3,500e3,136,150,33,43])    # magnetic extent of interpolation region, double
     alti,mloni,mlati,parmi = vtu2regular.sample_gemini(data,centers,parmids=iparm,
-                                                       lpts=lpts,lims=lims,
-                                                       targettype="geomagnetic")
+                                                   lpts=lpts,lims=glims,
+                                                   targettype="geographic")
     
     # Write the uniformly sampled data to a file
     coordlbls=["alti","mloni","mlati"]
