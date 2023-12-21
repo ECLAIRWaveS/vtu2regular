@@ -20,13 +20,16 @@ filename=direc+"fort_frame_0028.vtu"
 print("Reading vtu file:  "+filename)
 data, centers, nodes = vtu2regular.read_vtu(filename)
 iparm=np.array([13],dtype=np.int32)            # parameter number, must be int
-lims=np.array([90e3,500e3,-155,-145,25,33])    # extent of interpolation region, double
 lpts=np.array([128,128,128],dtype=np.int32)    # size of target grid, must be int
 print("Resampling GEMINI data...")
+mlims=np.array([90e3,500e3,-155,-145,25,33])    # magnetic extent of interpolation region, double
+#alti,mloni,mlati,parmi = vtu2regular.sample_gemini(data,centers,parmids=iparm,
+#                                                   lpts=lpts,lims=mlims,
+##                                                   targettype="geomagnetic")
+glims=np.array([90e3,500e3,136,150,33,43])    # magnetic extent of interpolation region, double
 alti,mloni,mlati,parmi = vtu2regular.sample_gemini(data,centers,parmids=iparm,
-                                                   lpts=lpts,lims=lims,
-                                                   targettype="geomagnetic")
-
+                                                   lpts=lpts,lims=glims,
+                                                   targettype="geographic")
 
 # Write the uniformly sampled data to a file
 coordlbls=["alti","mloni","mlati"]
@@ -41,13 +44,13 @@ plt.subplots(1,3,dpi=100)
 plt.subplot(1,3,1)
 plt.pcolormesh(mloni,alti/1e3,parmi[:,:,lpts[2]//2,0])
 plt.colorbar()
-plt.xlabel("mag. lon. (deg)")
+plt.xlabel("lon. (deg)")
 plt.ylabel("alt. (km) ")
 
 plt.subplot(1,3,2)
 plt.pcolormesh(mlati,alti/1e3,np.squeeze(parmi[:,lpts[1]//2,:,0]))
 plt.colorbar()
-plt.xlabel("mag. lat. (deg)")
+plt.xlabel("lat. (deg)")
 plt.ylabel("alt. (km) ")
 
 plt.subplot(1,3,3)
@@ -55,8 +58,8 @@ altref=300e3
 ialt=np.argmin(abs(alti-altref))
 plt.pcolormesh(mloni,mlati,np.squeeze(parmi[ialt,:,:,0]).transpose())
 plt.colorbar()
-plt.xlabel("mag. lon. (deg)")
-plt.ylabel("mag. lat. (deg) ")
+plt.xlabel("lon. (deg)")
+plt.ylabel("lat. (deg) ")
 
 plt.show()
 

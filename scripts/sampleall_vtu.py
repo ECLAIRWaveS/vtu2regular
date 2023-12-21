@@ -26,7 +26,7 @@ for filename in filelist:
     data, centers, nodes = vtu2regular.read_vtu(filenamefull)
     iparm=np.array([6,13,20,27,28,34],dtype=np.int32)            # parameter number, must be int
     lims=np.array([90e3,500e3,-155,-145,25,33])    # extent of interpolation region, double
-    lpts=np.array([128,128,128],dtype=np.int32)    # size of target grid, must be int
+    lpts=np.array([384,384,384],dtype=np.int32)    # size of target grid, must be int
     print("Resampling GEMINI data...")
     alti,mloni,mlati,parmi = vtu2regular.sample_gemini(data,centers,parmids=iparm,
                                                        lpts=lpts,lims=lims,

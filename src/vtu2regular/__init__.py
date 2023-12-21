@@ -10,6 +10,8 @@ import numpy as np
 from scipy.interpolate import griddata as griddata
 
 import h5py
+
+import gemini3d.coord
 # from vtk.numpy_interface import dataset_adapter as dsa
 
 __version__ = "0.0.1"
@@ -74,41 +76,56 @@ def sample_gemini(data, centers, parmids=[-1], lpts=None, lims=None, targettype=
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
     """
 
+    # Set defaults if needed
+    if lpts is None:
+        lpts=[128,128,128]
+        print("sample_gemini --> default size of ",lpts)
+    if targettype is None or not (targettype=="geomgagnetic" or targettype=="geographic"):
+        targettype="geomagnetic"
+        print("sample_gemini --> defaulting to target geomagnetic coordinates")
+
     # source coordinates, assume Carteisan or commensurate units at the least.
     x=centers[:,0]
     y=centers[:,1]
     z=centers[:,2]   
     
-    # express the source coordinates in magnetic coordinates
+    # express the source coordinates (which are Cartesian ECEF magnetic in terms
+    #   of magnetic latitude and longitude OR geographic lat and lon
     r=np.sqrt(x**2+y**2+z**2)
     rho=np.sqrt(x**2+y**2)
     theta=np.arccos(z/rho)
     phi=np.arctan2(y,x)
-    mlat=90-theta*180/np.pi
-    mlon=phi*180/np.pi
     alt=r-Re
-    
-    # Set defaults if needed
-    if lims is None:
-        lims=[alt.min(),alt.max(),mlon.min(),mlon.max(),mlat.min(),mlat.max()]
-        print("sample_gemini --> defaulting to min/max based on source grid limits")
-    if lpts is None:
-        lpts=[128,128,128]
-        print("sample_gemini --> default size of ",lpts)
-    if targettype is None or not (targettype=="geomgagnetic" or targettype=="geographic"):
-        targetttype="geomagnetic"
-        print("sample_gemini --> defaulting to target geomagnetic coordinates")
+    if targettype=="geographic":
+        print("sample_gemini --> Target coords. are geographic")
+        lat,lon = gemini3d.coord.geomag2geog(theta, phi)
+    else: 
+        print("sample_gemini --> Target coords. are geomagnetic")
+        lat=90-theta*180/np.pi
+        lon=phi*180/np.pi
         
-    # create a gridded target set of interpolate sites
+    # Now that the source coords have been expressed in the target system we can
+    #   define extents.  
+    if lims is None:
+        lims=[alt.min(),alt.max(),lon.min(),lon.max(),lat.min(),lat.max()]
+        print("sample_gemini --> defaulting to min/max based on source grid limits")   
+        
+    # create a gridded target set of interpolate sites; target coordinate system
+    #   is either geomagnetic or geographic per user input
     x1i=np.linspace(lims[0],lims[1],lpts[0])       # altitude
-    x2i=np.linspace(lims[2],lims[3],lpts[1])       # mag. lon.
-    x3i=np.linspace(lims[4],lims[5],lpts[2])       # mag. lat.
+    x2i=np.linspace(lims[2],lims[3],lpts[1])       # mag. or geog. lon.
+    x3i=np.linspace(lims[4],lims[5],lpts[2])       # mag. or geog. lat.
     [X1i,X2i,X3i]=np.meshgrid(x1i,x2i,x3i,indexing="ij")
 
-    # convert interpolation sites to source coordinate system
-    THETAi=np.pi/2-X3i*np.pi/180
-    PHIi=X2i*np.pi/180
+    # convert interpolation sites to source coordinate system.  Arguably these types
+    #   of transformations should be calls to gemini3d.coord even though they are
+    #   quite simple
     Ri=X1i+Re
+    if targettype=="geographic":
+        THETAi,PHIi = gemini3d.coord.geog2geomag(X3i,X2i)
+    else:
+        THETAi=np.pi/2-X3i*np.pi/180
+        PHIi=X2i*np.pi/180           
     Zi=Ri*np.cos(THETAi)
     Xi=Ri*np.sin(THETAi)*np.cos(PHIi)
     Yi=Ri*np.sin(THETAi)*np.sin(PHIi)
