@@ -12,8 +12,8 @@ import os
 
 # Obtain the model data and cell center locations
 #filename="/Users/zettergm/simulations/ssd/figments_misty_3Dx_512_23/gemini_output/fort_frame_0028.vtu"
-direc="/Users/zettergm/simulations/ssd/figments_misty_3Dx_2048_36_long/gemini_output/"
-outdirec="/Users/zettergm/simulations/ssd/figments_misty_3Dx_2048_36_long/gemini_output_hdf5/"
+direc="/Users/zettergm/simulations/ssd/misty_NM_256_quasistatic/gemini_output/"
+outdirec="/Users/zettergm/simulations/ssd/misty_NM_256_quasistatic/gemini_output_hdf5/"
 if not os.path.isdir(outdirec):
     os.mkdir(outdirec)
 filelist=os.listdir(direc)
@@ -25,13 +25,14 @@ for filename in filelist:
     print("Reading vtu file:  "+filenamefull)
     data, centers, nodes = vtu2regular.read_vtu(filenamefull)
     iparm=np.array([6,13,20,27,28,34],dtype=np.int32)            # parameter number, must be int
-    lpts=np.array([384,384,384],dtype=np.int32)    # size of target grid, must be int
+    lpts=np.array([256,256,256],dtype=np.int32)                  # size of target grid, must be int
     print("Resampling GEMINI data...")
     # mlims=np.array([90e3,500e3,-155,-145,25,33])    # extent of interpolation region, double
     # alti,mloni,mlati,parmi = vtu2regular.sample_gemini(data,centers,parmids=iparm,
     #                                                    lpts=lpts,lims=mlims,
     #                                                    targettype="geomagnetic")
-    glims=np.array([90e3,500e3,136,150,33,43])    # magnetic extent of interpolation region, double
+    #glims=np.array([90e3,500e3,136,150,33,43])        # magnetic extent of interpolation region, double
+    glims=np.array([90e3,500e3,249,258,29,36])    # magnetic extent of interpolation region, double
     alti,mloni,mlati,parmi = vtu2regular.sample_gemini(data,centers,parmids=iparm,
                                                    lpts=lpts,lims=glims,
                                                    targettype="geographic")

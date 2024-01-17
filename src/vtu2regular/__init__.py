@@ -92,10 +92,11 @@ def sample_gemini(data, centers, parmids=[-1], lpts=None, lims=None, targettype=
     # express the source coordinates (which are Cartesian ECEF magnetic in terms
     #   of magnetic latitude and longitude OR geographic lat and lon
     r=np.sqrt(x**2+y**2+z**2)
-    rho=np.sqrt(x**2+y**2)
-    theta=np.arccos(z/rho)
+    #rho=np.sqrt(x**2+y**2)
+    theta=np.arccos(np.minimum(np.maximum(z/r,-1),1))
     phi=np.arctan2(y,x)
     alt=r-Re
+     
     if targettype=="geographic":
         print("sample_gemini --> Target coords. are geographic")
         lat,lon = gemini3d.coord.geomag2geog(theta, phi)
