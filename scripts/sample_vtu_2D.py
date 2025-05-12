@@ -18,11 +18,11 @@ data, centers, nodes = vtu2regular.read_vtu(filename)
 iparm=np.array([13],dtype=np.int32)            # parameter number, must be int
 lpts=np.array([256,256],dtype=np.int32)    # size of target grid, must be int
 print("Resampling GEMINI data...")
-mlims=np.array([90e3,500e3,25,33])    # magnetic extent of interpolation region, double
+mlims=np.array([90e3,500e3,39,44])    # magnetic extent of interpolation region, double
 
 
 alti,mlati,parmi = vtu2regular.sample_gemini_2D(data,centers,parmids=iparm,
-                                                   lpts=lpts)
+                                                   lpts=lpts,lims=mlims)
 
 # Make a plot
 plt.figure(dpi=150)
