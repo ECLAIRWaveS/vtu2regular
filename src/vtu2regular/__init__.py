@@ -84,7 +84,7 @@ def sample_gemini(data, centers, parmids=[-1], lpts=None, lims=None, targettype=
         targettype="geomagnetic"
         print("sample_gemini --> defaulting to target geomagnetic coordinates")
 
-    # source coordinates, assume Carteisan or commensurate units at the least.
+    # source coordinates, assume Cartesian or commensurate units at the least.
     x=centers[:,0]
     y=centers[:,1]
     z=centers[:,2]   
@@ -146,6 +146,70 @@ def sample_gemini(data, centers, parmids=[-1], lpts=None, lims=None, targettype=
         parmi[:,:,:,iparm]=parmitmp.reshape(lpts,order="F")
         
     return x1i,x2i,x3i,parmi
+
+
+def sample_gemini_2D(data, centers, parmids=[-1], lpts=None, lims=None, targettype=None):
+    """
+    Sample unstructured data to regular grid.  The source coordinate system is rho,z where
+    rho = sqrt(x**2 + y**2), and x,y,z are ECEF magnetic coordinates.  
+
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
+    """
+
+    # Set defaults if needed
+    if lpts is None:
+        lpts=[128,128]
+        print("sample_gemini --> default size of ",lpts)
+    targettype="geomagnetic"     # force geomagnetic  always for 2D ouptut
+    print("sample_gemini --> target geomagnetic coordinates...")
+
+    # source coordinates, assume Cartesian or commensurate units at the least.
+    rho=centers[:,0]
+    z=centers[:,1]
+    _=centers[:,2]      # for 2D Trees GEMINI output this should be all zeros, always
+     
+    print("sample_gemini --> Target coords. are geomagnetic")
+    r=np.sqrt(rho**2+z**2)
+    theta = np.arccos(np.minimum(np.maximum(z/r,-1),1))
+    alt=r-Re
+    lat=90-theta*180/np.pi
+        
+    # Now that the source coords have been expressed in the target system we can
+    #   define extents.  
+    if lims is None:
+        lims=[alt.min(),alt.max(),lat.min(),lat.max()]
+        print("sample_gemini --> defaulting to min/max based on source grid limits")   
+        
+    # create a gridded target set of interpolate sites; target coordinate system
+    #   is either geomagnetic or geographic per user input
+    x1i=np.linspace(lims[0],lims[1],lpts[0])       # altitude
+    x2i=np.linspace(lims[2],lims[3],lpts[1])       # mag. lat.
+    [X1i,X2i]=np.meshgrid(x1i,x2i,indexing="ij")
+
+    # convert interpolation sites to source coordinate system.  Arguably these types
+    #   of transformations should be calls to gemini3d.coord even though they are
+    #   quite simple
+    Ri=X1i+Re
+    THETAi=np.pi/2-X2i*np.pi/180
+    Zi=Ri*np.cos(THETAi)
+    RHOi=Ri*np.sin(THETAi)
+
+    # which parameters are we needing to grid
+    if parmids[0]==-1:                           # extract all parameters
+        parmidextract=range(0,data.shape[1])     # second axis is parameter number
+        print("sample_gemini --> WARNING:  extracting and gridding all parameters.  May take a while...")
+    else: 
+        parmidextract=parmids            # extract only a set number of parameters
+
+    # perform interpolation onto target sites
+    parmi=np.zeros( (lpts[0], lpts[1], len(parmidextract) ), dtype=np.float32 )
+    for iparm in range(len(parmidextract)):
+        print("sample_gemini --> Sampling parameter number:  ",parmidextract[iparm]," on target grid size ",lpts)
+        parmitmp = griddata((rho,z), data[:,parmidextract[iparm]], (RHOi.flatten(order="F"),Zi.flatten(order="F")),method="nearest")
+        parmi[:,:,iparm]=parmitmp.reshape(lpts,order="F")
+        
+    return x1i,x2i,parmi
+
 
 
 def write_sampled(x1i,x2i,x3i,coordlbls,parmi,parmlbls,file: Path):
