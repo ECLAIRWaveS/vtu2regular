@@ -156,6 +156,10 @@ def sample_gemini_2D(data, centers, parmids=[-1], lpts=None, lims=None, targetty
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
     """
 
+    # set the interpolation method to be used
+    #interpmethod="nearest"
+    interpmethod="linear"
+
     # Set defaults if needed
     if lpts is None:
         lpts=[128,128]
@@ -205,7 +209,7 @@ def sample_gemini_2D(data, centers, parmids=[-1], lpts=None, lims=None, targetty
     parmi=np.zeros( (lpts[0], lpts[1], len(parmidextract) ), dtype=np.float32 )
     for iparm in range(len(parmidextract)):
         print("sample_gemini --> Sampling parameter number:  ",parmidextract[iparm]," on target grid size ",lpts)
-        parmitmp = griddata((rho,z), data[:,parmidextract[iparm]], (RHOi.flatten(order="F"),Zi.flatten(order="F")),method="nearest")
+        parmitmp = griddata((rho,z), data[:,parmidextract[iparm]], (RHOi.flatten(order="F"),Zi.flatten(order="F")),method=interpmethod)
         parmi[:,:,iparm]=parmitmp.reshape(lpts,order="F")
         
     return x1i,x2i,parmi
