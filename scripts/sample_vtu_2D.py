@@ -16,7 +16,7 @@ filename=direc+"fort_frame_0200.vtu"
 print("Reading vtu file:  "+filename)
 data, centers, nodes = vtu2regular.read_vtu(filename)
 iparm=np.array([6,13],dtype=np.int32)            # parameter number, must be int
-lpts=np.array([4096,4096],dtype=np.int32)    # size of target grid, must be int
+lpts=np.array([5000,5000],dtype=np.int32)    # size of target grid, must be int
 print("Resampling GEMINI data...")
 mlims=np.array([90e3,200e3,40.25,42.75])    # magnetic extent of interpolation region, double
 alti,mlati,parmi = vtu2regular.sample_gemini_2D(data,centers,parmids=iparm,
